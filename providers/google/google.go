@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	gauth "golang.org/x/oauth2/google"
@@ -97,6 +98,14 @@ func keyForRec(r *models.RecordConfig) key {
 	return key{Type: r.Type, Name: r.NameFQDN + "."}
 }
 
+func atou16(s string) uint16 {
+	i64, err := strconv.ParseInt(s, 10, 32)
+	if err != nil {
+		panic(fmt.Sprintf("atou16 failed (%v) (err=%v", s, err))
+	}
+	return uint16(i64)
+}
+
 func (g *gcloud) GetDomainCorrections(dc *models.DomainConfig) ([]*models.Correction, error) {
 	if err := dc.Punycode(); err != nil {
 		return nil, err
@@ -120,6 +129,27 @@ func (g *gcloud) GetDomainCorrections(dc *models.DomainConfig) ([]*models.Correc
 				Type:     set.Type,
 				Target:   rec,
 				TTL:      uint32(set.Ttl),
+			}
+			switch set.Type {
+			case "A", "AAAA", "CNAME", "NS", "TXT":
+				// nothing
+			case "MX":
+				parts := strings.Fields(rec)
+				if len(parts) != 2 {
+					panic(fmt.Sprintf("mx bad format %V", rec))
+				}
+				r.MxPreference = atou16(parts[0])
+				r.Target = parts[1]
+			case "SRV":
+				parts := strings.Fields(rec)
+				if len(parts) != 3 {
+					panic(fmt.Sprintf("srv bad format %V", rec))
+				}
+				r.SrvPriority = atou16(parts[0])
+				r.SrvWeight = atou16(parts[1])
+				r.SrvPort = atou16(parts[2])
+			default:
+				panic(fmt.Sprintf("GetDomainCorrections rtype %v unimplemented", set.Type))
 			}
 			existingRecords = append(existingRecords, r)
 		}

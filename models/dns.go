@@ -193,6 +193,64 @@ func atou32(s string) uint32 {
 	return uint32(i64)
 }
 
+//// RecordConfigFromRR
+//func RecordConfigFromRR(rr dns.RR, domainName string) *RecordConfig {
+//
+//	hdr := rr.Header()
+//
+//	nameWithoutDot := strings.ToLower(hdr.Name)
+//	if strings.HasSuffix(nameWithoutDot, ".") {
+//		nameWithoutDot = nameWithoutDot[:len(nameWithoutDot)-1]
+//	}
+//
+//	rc := &RecordConfig{
+//		NameFQDN: nameWithoutDot,
+//		Name:     dnsutil.TrimDomainName(nameWithoutDot, domainName),
+//		Type:     dns.TypeToString[hdr.Rrtype],
+//		TTL:      hdr.Ttl,
+//	}
+//
+//	// Fill in the data.
+//	switch hdr.Rrtype {
+//	case dns.TypeA:
+//		rc.Target = rr.(*dns.A).A.String()
+//	case dns.TypeAAAA:
+//		rc.Target = rr.(*dns.AAAA).AAAA.String()
+//	case dns.TypeCNAME:
+//		rc.Target = rr.(*dns.CNAME).Target
+//	case dns.TypePTR:
+//		rc.Target = rr.(*dns.PTR).Ptr
+//	case dns.TypeMX:
+//		rc.Target = rr.(*dns.MX).Mx
+//		rc.MxPreference = rr.(*dns.MX).Preference
+//	case dns.TypeNS:
+//		rc.Target = rr.(*dns.NS).Ns
+//	case dns.TypeSOA:
+//		rc.Target = fmt.Sprintf("%v %v %v %v %v %v %v",
+//			rr.(*dns.SOA).Ns,
+//			rr.(*dns.SOA).Mbox,
+//			rr.(*dns.SOA).Serial,
+//			rr.(*dns.SOA).Refresh,
+//			rr.(*dns.SOA).Retry,
+//			rr.(*dns.SOA).Expire,
+//			rr.(*dns.SOA).Minttl)
+//	case dns.TypeSRV:
+//		rc.Target = rr.(*dns.SRV).Target
+//		rc.SrvPriority = rr.(*dns.SRV).Priority
+//		rc.SrvWeight = rr.(*dns.SRV).Weight
+//		rc.SrvPort = rr.(*dns.SRV).Port
+//	case dns.TypeTXT:
+//		if len(rr.(*dns.TXT).Txt) != 1 {
+//			panic(fmt.Sprintf("Unimplemented: txt records can't have more than 1 string: %v %V", hdr.Name, rr.(*dns.TXT).Txt))
+//		}
+//		rc.Target = rr.(*dns.TXT).Txt[0]
+//	default:
+//		panic(fmt.Sprintf("RecordConfigFromRR: Unimplemented rtype %v", hdr.Rrtype))
+//	}
+//
+//	return rc
+//}
+
 type Nameserver struct {
 	Name   string `json:"name"` // Normalized to a FQDN with NO trailing "."
 	Target string `json:"target"`
