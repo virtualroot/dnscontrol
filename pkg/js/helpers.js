@@ -636,8 +636,10 @@ function SPF_BUILDER(value) {
         p.split = value.overflow;
     }
 
-    // Generate a TXT record with the metaparameters.
-    r.push(TXT(value.label, rawspf, p));
+    // Generate a TXT record per label with the metaparameters.
+    for (var i = 0; i < value.label.length; i++) {
+        r.push(TXT(value.label[i], rawspf, p));
+    }
 
     return r;
 }
